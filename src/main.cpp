@@ -50,7 +50,8 @@ void setup()
     // Blue pixel during startup
     pixels.begin();
     pixels.setBrightness(10);
-    pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+    pixels.setPixelColor(0, pixels.Color(0, 0, 255));
+    pixels.show();
 
     Serial.begin(9600);
 
@@ -61,12 +62,24 @@ void setup()
 
     gravityTds.setTemperature(20);
 
+    // Hope the voltage is stable and the display will be ready.
+    delay(1000);
+
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     // Address 0x3C for 128x32 display.
-    // TODO: Why is this not enough to ensure the display works?
-    while (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-        // Assume display just received power and try again.
-        delay(10);
+    // If begin() returns false, there were argument problems. The library
+    // doesn't actually check if the display is responding.
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        // Blink red and blue on failure.
+        while (true) {
+            pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+            pixels.show();
+            delay(200);
+
+            pixels.setPixelColor(0, pixels.Color(0, 0, 255));
+            pixels.show();
+            delay(200);
+        }
     }
 
     display.setTextColor(SSD1306_WHITE);
