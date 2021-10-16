@@ -30,50 +30,69 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_GFX.h>
 
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+Adafruit_SSD1306 display(128, 32, &Wire);
 
-// create a pixel strand with 1 pixel on PIN_NEOPIXEL
+// Address the QT Py's built-in NeoPixel.
 Adafruit_NeoPixel pixels(1, PIN_NEOPIXEL);
 
 GravityTDS gravityTds;
 
-const size_t sampleCount = 40;
-const size_t sampleMS = 10;
+// Count of samples to use in each displayed value.
+const size_t sampleCount = 2750;
 
-float temperature = 20;
+// Take the mean of this many samples from each side of the median.
+const size_t aroundMedian = 100;
 
 int cmp_float(const void *, const void *);
 
 void setup()
 {
-    Serial.begin(9600);
+    // Blue pixel during startup
     pixels.begin();
+    pixels.setBrightness(10);
+    pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+
+    Serial.begin(9600);
 
     gravityTds.setPin(A10);
     gravityTds.setAref(3.3);
     gravityTds.setAdcRange(1 << 12);
     gravityTds.begin();
-    //temperature = readTemperature();  //add your temperature sensor and read it
-    gravityTds.setTemperature(temperature);  // set the temperature and execute temperature compensation
+
+    gravityTds.setTemperature(20);
 
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+    // Address 0x3C for 128x32 display.
+    // TODO: Why is this not enough to ensure the display works?
+    while (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        // Assume display just received power and try again.
+        delay(10);
+    }
+
     display.setTextColor(SSD1306_WHITE);
 }
 
 void loop()
 {
-    gravityTds.update();
+    //float temperature = 20;
+    //gravityTds.setTemperature(temperature);
 
     float tdsSamples[sampleCount];
-    for (int i = 0; i < sampleCount; i++) {
+    
+    for (size_t i = 0; i < sampleCount; i++) {
+        gravityTds.update();
         tdsSamples[i] = gravityTds.getTdsValue();
-        delay(sampleMS);
     }
 
-    // Use median.
+    // Use mean of values around median.
     qsort(tdsSamples, sampleCount, sizeof(float), cmp_float);
-    float tdsValue = tdsSamples[sampleCount / 2];
+
+    const size_t middleIndex = sampleCount / 2;
+    float tdsSum = 0;
+    for (size_t i = middleIndex - aroundMedian; i < middleIndex + aroundMedian; i++) {
+        tdsSum += tdsSamples[i];
+    }
+    float tdsValue = tdsSum / (aroundMedian * 2);
 
     if (tdsValue < 1.0) {
         // Very low: green
@@ -98,7 +117,9 @@ void loop()
     display.print(" ppm");
     display.display();
 
-    Serial.print(tdsValue, 0);
+    Serial.print(millis());
+    Serial.print(' ');
+    Serial.print(tdsValue, 3);
     Serial.println(" ppm");
 }
 
