@@ -54,8 +54,9 @@ void setup()
 
     gravityTds.setTemperature(20);
 
-    // Hope the voltage is stable and the display will be ready.
-    delay(1000);
+    // Assuming initial power on; delay and hope the display will be ready after that.
+    // https://learn.adafruit.com/adafruit-oled-featherwing?view=all#faq-3011126
+    delay(150);
 
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     // Address 0x3C for 128x32 display.
@@ -75,6 +76,7 @@ void setup()
     }
 
     display.setTextColor(SSD1306_WHITE);
+    display.dim(true);
 }
 
 void loop()
