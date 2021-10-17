@@ -149,7 +149,7 @@ void loop()
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(4);
-    display.printf("%03d", (int) round(tdsValue));
+    display.printf("%3d", (int) round(tdsValue));
 
     display.setCursor(80, 0);
     display.setTextSize(2);
