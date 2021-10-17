@@ -107,7 +107,7 @@ void loop()
     }
     float tdsValue = tdsSum / (aroundMedian * 2);
 
-    // ZeroWater marketing suggests <6
+    // ZeroWater marketing suggests < 6
     //
     // WHO guidelines - it's just taste, not health unless very low.
     //
