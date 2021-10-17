@@ -107,14 +107,42 @@ void loop()
     }
     float tdsValue = tdsSum / (aroundMedian * 2);
 
-    if (tdsValue < 1.0) {
-        // Very low: green
-        pixels.setPixelColor(0, pixels.Color(0, 255, 0));
-    } else if (tdsValue < 6.0) {
-        // Below replace threshold: yellow
+    // ZeroWater marketing suggests <6
+    //
+    // WHO guidelines - it's just taste, not health unless very low.
+    //
+    //     > The final report, published in 1980 as an internal working document (3), concluded that “not
+    //     > only does completely demineralised water (distillate) have unsatisfactory organoleptic
+    //     > properities, but it also has a definite adverse influence on the animal and human organism”.
+    //
+    // - https://www.who.int/water_sanitation_health/dwq/nutrientschap12.pdf
+    //
+    //     > Reliable data on possible health effects associated with the ingestion of TDS in drinking-
+    //     > water are not available. The results of early epidemiological studies suggest that even low
+    //     > concentrations of TDS in drinking-water may have beneficial effects, although adverse effects
+    //     > have been reported in two limited investigations.
+    //
+    // mg/L:
+    //
+    // < 300   | Excellent
+    // < 600   | Good
+    // < 900   | Fair
+    // < 1,200 | Poor
+    // More    | Unacceptable
+    //
+    // - https://www.who.int/water_sanitation_health/dwq/chemicals/tds.pdf
+    // 
+    // Note that ppm is almost exactly equal to mg/L: conversion factor 0.998859.
+    //
+    // - https://www.easycalculation.com/unit-conversion/ppm-mgl-conversion.php
+    if (tdsValue < 6.0) {
+        // Very low: yellow
         pixels.setPixelColor(0, pixels.Color(128, 128, 0));
+    } else if (tdsValue < 300) {
+        // Excellent: green
+        pixels.setPixelColor(0, pixels.Color(0, 255, 0));
     } else {
-        // High: red
+        // Noticably high: red
         pixels.setPixelColor(0, pixels.Color(255, 0, 0));
     }
 
@@ -123,7 +151,7 @@ void loop()
     display.clearDisplay();
     display.setCursor(0, 0);
     display.setTextSize(4);
-    display.print(tdsValue, 0);
+    display.printf("%03d", (int) round(tdsValue));
 
     display.setCursor(80, 0);
     display.setTextSize(2);
