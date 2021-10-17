@@ -77,6 +77,10 @@ void setup()
 
     display.setTextColor(SSD1306_WHITE);
     display.dim(true);
+
+    // Turn off LED at end of startup - first measurement can take a bit.
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0));
+    pixels.show();
 }
 
 void loop()
