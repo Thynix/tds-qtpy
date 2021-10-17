@@ -10,4 +10,5 @@ Measure Total Dissolved Solids and display it on an OLED display as a number and
 
 ## Layout
 
-TODO: Diagram
+![Breadboard](/breadboard.png)
+![Schematic](/schematic.png)
